@@ -1,6 +1,6 @@
-package day_1;
+package aocjava;
 
-public class Library {
+public class Day_1 {
     public boolean someLibraryMethod() {
         return true;
     }
