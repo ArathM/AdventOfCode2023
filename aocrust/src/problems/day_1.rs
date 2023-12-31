@@ -1,11 +1,7 @@
 use std::fs::read_to_string;
 use fancy_regex::Regex;
 use std::collections::HashMap;
-
-pub enum Flag {
-    Part1,
-    Part2,
-}
+use crate::Flag;
 
 pub struct Day1 {
     input_file: String,
@@ -31,7 +27,7 @@ impl Day1 {
         result
     }
 
-    pub fn get_sum(&self) {
+    pub fn solve_problems(&self) {
 
         let lines: Vec<String> = Self::read_lines(&self.input_file);
         let mut sum = 0;

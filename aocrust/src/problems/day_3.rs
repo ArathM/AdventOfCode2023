@@ -1,10 +1,6 @@
 use std::fs::read_to_string;
 use std::collections::HashMap;
-
-pub enum Flag {
-    Part1,
-    Part2,
-}
+use crate::Flag;
 
 pub struct Day3 {
     input_file: String,
@@ -19,12 +15,17 @@ struct Schematic {
     numbers : HashMap<(u8, u8, u8), (u32,bool)>
 }
 
+// Struct that holds the position of a cog, as well as its part numbers if any.
+// We only need the coordinates since cogs are a single character
+struct CogSchematic {
+    cogs : HashMap<(u8, u8), Vec<i32>>
+}
+
 impl Schematic {
     
     // Function to check if a number contains adjacent symbols
     // by checking the starting position up to the length of the number
     pub fn contains_adjacent_symbols(&mut self, x: usize, y: usize, len: usize) {
-        let columns = self.matrix[0].len();
 
         for i in 0..len {
             if matches!(self.matrix[x-1][y-1+i], '*' | '0'..='9')
@@ -40,6 +41,45 @@ impl Schematic {
         }
     }
 
+}
+
+impl CogSchematic {
+
+    // Given a CogSchematic object with the position of the cogs,
+    // fills the part numbers around each cog
+    pub fn get_cog_ratios(&mut self, part_numbers: HashMap<(u8, u8, u8), (u32,bool)>) {
+
+        let cog_keys = self.cogs.keys().cloned().collect::<Vec<_>>();
+        for cog in cog_keys {
+            let x = cog.0;
+            let y = cog.1;
+
+            // Checking the 8 positions around the cog
+            for part_number in &part_numbers {
+                if part_number.1 .1 {
+                    let part_number_x = part_number.0.0;
+                    let part_number_y = part_number.0.1;
+                    let part_number_len = part_number.0.2;
+                    let mut added = false;
+
+                    for i in 0..part_number_len {
+                        if (part_number_x == x-1 && part_number_y+i == y-1
+                        || part_number_x == x-1 && part_number_y+i == y
+                        || part_number_x == x-1 && part_number_y+i == y+1
+                        || part_number_x == x && part_number_y+i == y-1
+                        || part_number_x == x && part_number_y+i == y+1
+                        || part_number_x == x+1 && part_number_y+i == y-1
+                        || part_number_x == x+1 && part_number_y+i == y
+                        || part_number_x == x+1 && part_number_y+i == y+1) 
+                        && !added{
+                            self.cogs.get_mut(&cog).unwrap().push(part_number.1.0 as i32); 
+                            added = true;  
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl Day3 {
@@ -68,22 +108,34 @@ impl Day3 {
             matrix: Vec::new(),
             numbers: HashMap::new(),
         };
+        let mut cogs = CogSchematic {
+            cogs: HashMap::new(),
+        };
 
         // Adding numbers to the number hashmap by position
         // Also, replacing symbols that aren't dots to a single value (*)
         // and storing it in matrix format
 
-        let COLUMNS = lines[0].len();
-        let v = vec!['.'; COLUMNS+2];
+        let columns = lines[0].len();
+        let v = vec!['.'; columns+2];
 
-        schematic.matrix.push(v.clone()).clone();
+        let _ = schematic.matrix.push(v.clone()).clone();
 
         let mut x = 1;
         for line in lines {
             let mut row = Vec::new();
             let mut current_number = String::new();
-            let mut y=1;
 
+            let mut y=1;
+            //First storing only cogs positions
+            for c in line.chars() {
+                if c == '*' {
+                    cogs.cogs.insert((x,y), Vec::new());
+                }
+                y+=1;
+            }
+
+            let mut y=1;
             // Adding a dot to the beginning and end of each row
             // and an extra row at the beginning and end, to avoid out of bounds errors
             row.push('.');
@@ -97,7 +149,7 @@ impl Day3 {
                 } else if c.is_digit(10) {
                     current_number.push(c);
                     row.push(c);
-                    if usize::from(y) == COLUMNS {
+                    if usize::from(y) == columns {
                         schematic.numbers.insert((x,y-current_number.len() as u8+1, current_number.len() as u8), (current_number.parse::<u32>().unwrap(), false));
                         current_number.clear();
                     }
@@ -113,10 +165,10 @@ impl Day3 {
             }
             row.push('.');
 
-            schematic.matrix.push(row.clone()).clone();
+            let _ = schematic.matrix.push(row.clone()).clone();
             x+=1;
         }
-        schematic.matrix.push(v.clone()).clone();
+        let _ = schematic.matrix.push(v.clone()).clone();
 
         // Detecting the numbers that contain adjacent symbols
 
@@ -133,6 +185,23 @@ impl Day3 {
                 sum += number;
             }
         }
-        println!("The sum of the numbers that contain adjacent symbols is {}", sum);
+
+        if matches!(self.flag, Flag::Part1) {
+            println!("The sum of the numbers that contain adjacent symbols is {}", sum);
+        }
+        else if matches!(self.flag, Flag::Part2) {
+            // Getting the part numbers around each cog
+            cogs.get_cog_ratios(schematic.numbers);
+
+            // Getting the gear_ratios for each cog and its sum
+            let mut sum = 0;
+            let values = cogs.cogs.values().cloned().collect::<Vec<_>>();
+            for cog in values {
+                if cog.len() >= 2 {
+                    sum += cog.iter().product::<i32>();
+                }
+            }
+            println!("The sum of the gear_ratios of each cog is {}", sum);
+        }
     }
 }

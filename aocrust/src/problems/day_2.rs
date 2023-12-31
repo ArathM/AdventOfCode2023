@@ -1,10 +1,6 @@
 use std::fs::read_to_string;
 use std::collections::HashMap;
-
-pub enum Flag {
-    Part1,
-    Part2,
-}
+use crate::Flag;
 
 struct Game {
     id: i32,
