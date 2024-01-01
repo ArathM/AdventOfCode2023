@@ -1,12 +1,13 @@
-use std::fs::read_to_string;
 use fancy_regex::Regex;
 use std::collections::HashMap;
-use crate::Flag;
+use crate::{Flag, LineReader};
 
 pub struct Day1 {
     input_file: String,
     flag: Flag,
 }
+
+impl LineReader for Day1 {}
 
 impl Day1 {
 
@@ -15,16 +16,6 @@ impl Day1 {
             input_file: input_file.to_string(),
             flag
         }
-    }
-    
-    fn read_lines(filename: &str) -> Vec<String> {
-        let mut result = Vec::new();
-
-        for line in read_to_string(filename).unwrap().lines() {
-            result.push(line.to_string())
-        }
-
-        result
     }
 
     pub fn solve_problems(&self) {

@@ -1,11 +1,12 @@
-use std::fs::read_to_string;
 use std::collections::HashMap;
-use crate::Flag;
+use crate::{Flag, LineReader};
 
 pub struct Day3 {
     input_file: String,
     flag: Flag,
 }
+
+impl LineReader for Day3 {}
 
 // Struct to hold all data, as well as the starting position
 // of the numbers in the matrix, the length of the number, the number itself and whether
@@ -89,16 +90,6 @@ impl Day3 {
             input_file: input_file.to_string(),
             flag
         }
-    }
-    
-    fn read_lines(filename: &str) -> Vec<String> {
-        let mut result = Vec::new();
-
-        for line in read_to_string(filename).unwrap().lines() {
-            result.push(line.to_string())
-        }
-
-        result
     }
 
     pub fn solve_problems(&self) {

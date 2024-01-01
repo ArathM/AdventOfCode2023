@@ -1,6 +1,5 @@
-use std::fs::read_to_string;
 use std::collections::HashMap;
-use crate::Flag;
+use crate::{Flag, LineReader};
 
 struct Game {
     id: i32,
@@ -12,6 +11,8 @@ pub struct Day2 {
     flag: Flag,
 }
 
+impl LineReader for Day2 {}
+
 impl Day2 {
 
     pub fn new(input_file: &str, flag: Flag) -> Day2 {
@@ -21,15 +22,6 @@ impl Day2 {
         }
     }
     
-    fn read_lines(filename: &str) -> Vec<String> {
-        let mut result = Vec::new();
-
-        for line in read_to_string(filename).unwrap().lines() {
-            result.push(line.to_string())
-        }
-
-        result
-    }
 
     pub fn solve_problems(&self) {
 
